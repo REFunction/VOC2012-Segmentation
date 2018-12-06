@@ -8,7 +8,9 @@ This code will help you use Pascal VOC 2012 Dataset to do research on Semantic S
 - h5py
 ## How to Start
 To use Pascal VOC 2012 Dataset, you must have one.
+
 http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
+
 Download and extract it.
 
 ### Now create a VOC object like this.
