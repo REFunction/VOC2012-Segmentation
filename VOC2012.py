@@ -44,6 +44,7 @@ class VOC2012:
                 break
             self.val_list.append(line)
         f.close()
+
     def read_train_images(self):
         self.train_images = []
         if hasattr(self, 'train_list') == False:
@@ -61,7 +62,9 @@ class VOC2012:
         for filename in self.train_list:
             image = Image.open(self.label_path + filename + '.png')
             image = image.resize(self.image_size)
-            self.train_labels.append(np.array(image))
+            image = np.array(image)
+            image[image > 100] = 0
+            self.train_labels.append(image)
             if len(self.train_labels) % 100 == 0:
                 print('Reading train labels', len(self.train_labels), '/', len(self.train_list))
     def read_val_images(self):
@@ -81,7 +84,9 @@ class VOC2012:
         for filename in self.val_list:
             image = Image.open(self.label_path + filename + '.png')
             image = image.resize(self.image_size)
-            self.val_labels.append(np.array(image))
+            image = np.array(image)
+            image[image > 100] = 0
+            self.val_labels.append(image)
             if len(self.val_labels) % 100 == 0:
                 print('Reading val labels', len(self.val_labels), '/', len(self.val_list))
 
