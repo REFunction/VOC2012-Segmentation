@@ -1,5 +1,5 @@
 # VOC2012-Segmentation
-This code will help you use Pascal VOC 2012 Dataset do research on Semantic Segmentation.
+This code will help you use Pascal VOC 2012 Dataset to do research on Semantic Segmentation.
 ## Prerequisition
 - python 3
 - cv2
@@ -18,7 +18,7 @@ voc2012 = VOC2012('./VOC2012/')
 ```
 Only to assign the root path of your dataset.Note that the path parameter refers to the layer with name 'VOC2012'.
 
-### Read all data and save in form of h5
+### Read all data and save in the form of h5
 h5py is an excellent packge which can save and load images very fast.You don't need to read raw images every time before you train your model.
 ``` python
 voc2012.read_all_data_and_save()
