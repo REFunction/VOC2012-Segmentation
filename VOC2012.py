@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import h5py
+import os
 
 def save_h5(path,images,labels):
     print('saving', path)
@@ -15,7 +16,8 @@ def load_h5(path):
 
 
 class VOC2012:
-    def __init__(self, root_path='./VOC2012/', image_size=(224, 224)):
+    def __init__(self, root_path='./VOC2012/', aug_path='SegmentationClassAug/', image_size=(224, 224),
+                 checkpaths=False):
         '''
         Create a VOC2012 object
         This function will set all paths needed, do not set them mannully expect you have
@@ -31,7 +33,30 @@ class VOC2012:
         self.val_list_path = self.root_path + 'ImageSets/Segmentation/val.txt'
         self.image_path = self.root_path + 'JPEGImages/'
         self.label_path = self.root_path + 'SegmentationClass/'
+        self.aug_path = aug_path
+        if aug_path[len(aug_path) - 1] != '/' and aug_path[len(aug_path) - 1] != '\\':
+            self.aug_path += '/'
         self.image_size = image_size
+        if checkpaths:
+            self.check_paths()
+
+    def check_paths(self):
+        '''
+        check all paths and display the status of paths
+        '''
+        if not (os.path.exists(self.root_path) and os.path.isdir(self.root_path)):
+            print('Warning: Dictionary', self.root_path, ' does not exist')
+        if not (os.path.exists(self.train_list_path) and os.path.isfile(self.train_list_path)):
+            print('Warning: Training list file', self.train_list_path, 'does not exist')
+        if not (os.path.exists(self.val_list_path) and os.path.isfile(self.val_list_path)):
+            print('Warning: Validation list file', self.val_list_path, 'does not exist')
+        if not (os.path.exists(self.image_path) and os.path.isdir(self.image_path)):
+            print('Warning: Dictionary', self.image_path, 'does not exist')
+        if not (os.path.exists(self.label_path) and os.path.isdir(self.label_path)):
+            print('Warning: Dictionary', self.label_path, 'does not exist')
+        if not (os.path.exists(self.aug_path) and os.path.isdir(self.aug_path)):
+            print('Warning: Dictionary', self.aug_path, 'does not exist')
+
     def read_train_list(self):
         '''
         Read the filenames of training images and labels into self.train_list
@@ -127,7 +152,45 @@ class VOC2012:
             self.val_labels.append(image)
             if len(self.val_labels) % 100 == 0:
                 print('Reading val labels', len(self.val_labels), '/', len(self.val_list))
+    def read_aug_images_labels_and_save(self, save_path='./voc2012_aug.h5'):
+        '''
+        read augmentation images and labels, and save them in the form of '.h5'
+        Note:This function will cost a great amount of memory. Leave enough to call it.
+        '''
+        is_continue = input('Warning:Reading augmentation files may take up a lot of memory, continue?[y/n]')
 
+        if is_continue != 'y' and is_continue != 'Y':
+            return
+
+        if hasattr(self, 'aug_images') == False:
+            self.aug_images = []
+        if hasattr(self, 'aug_labels') == False:
+            self.aug_labels = []
+        # check
+        if self.aug_path is None or os.path.exists(self.aug_path) == False:
+            raise Exception('No augmentation dictionary.Set attribute \'aug_path\' first')
+        if self.image_path is None or os.path.exists(self.image_path) == False:
+            raise Exception('Cannot find VOC2012 images path.')
+
+        aug_labels_filenames = os.listdir(self.aug_path)
+
+        for label_filename in aug_labels_filenames:
+            # read label
+            label = cv2.imread(self.aug_path + label_filename, cv2.IMREAD_GRAYSCALE)
+            label = cv2.resize(label, self.image_size)
+            label[label > 20] = 0
+            self.aug_labels.append(label)
+            # read image
+            image_filename = label_filename.replace('.png','.jpg')
+            image = cv2.imread(self.image_path + image_filename)
+            image = cv2.resize(image, self.image_size)
+            self.aug_images.append(image)
+            if len(self.aug_labels) % 100 == 0:
+                print('Reading augmentation image & label pairs', len(self.aug_labels), '/',
+                                                                    len(aug_labels_filenames))
+        save_h5(save_path, self.aug_images, self.aug_labels)
+    def load_aug_data(self, aug_data_path='./voc2012_aug.h5'):
+        self.aug_images, self.aug_labels = load_h5(aug_data_path)
     def save_train_data(self, path='./voc2012_train.h5'):
         '''
         save training images and labels into path in the form of .h5
@@ -178,6 +241,7 @@ class VOC2012:
             val_data_load_path:The validation data .h5 file path.
         '''
         self.val_images, self.val_labels = load_h5(path)
+
     def get_batch_train(self, batch_size):
         '''
         Get a batch data from training data.
@@ -222,5 +286,28 @@ class VOC2012:
         if end - start != batch_size:
             batch_images = np.concatenate([batch_images, self.val_images[0:self.val_location]], axis=0)
             batch_labels = np.concatenate([batch_labels, self.val_labels[0:self.val_location]], axis=0)
+
+        return batch_images, batch_labels
+    def get_batch_aug(self, batch_size):
+        '''
+        Get a batch data from augmentation data.
+        It maintains an internal location variable and get from start to end gradually.
+        When it comes into the end, it returns to the start.
+        Args:
+           batch_size:The number of images or labels returns at a time.
+        Return:
+           batch_images:A batch of images with shape:[batch_size, image_size, image_size, 3]
+           batch_labels:A batch of labels with shape:[batch_size, image_size, image_size]
+        '''
+        if hasattr(self, 'aug_location') == False:
+            self.aug_location = 0
+        end = min(self.aug_location + batch_size, len(self.aug_images))
+        start = self.aug_location
+        batch_images = self.aug_images[start:end]
+        batch_labels = self.aug_labels[start:end]
+        self.aug_location = (self.aug_location + batch_size) % len(self.aug_images)
+        if end - start != batch_size:
+            batch_images = np.concatenate([batch_images, self.aug_images[0:self.aug_location]], axis=0)
+            batch_labels = np.concatenate([batch_labels, self.aug_labels[0:self.aug_location]], axis=0)
 
         return batch_images, batch_labels
