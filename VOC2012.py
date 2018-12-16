@@ -17,16 +17,23 @@ def load_h5(path):
 
 class VOC2012:
     def __init__(self, root_path='./VOC2012/', aug_path='SegmentationClassAug/', image_size=(224, 224),
-                 checkpaths=False):
+                 resize_method='resize', checkpaths=False):
         '''
         Create a VOC2012 object
         This function will set all paths needed, do not set them mannully expect you have
         changed the dictionary structure
         Args:
             root_path:the Pascal VOC 2012 folder path
+            aug_path:The augmentation dataset path. If you don't want to use it, ignore
             image_size:resize images and labels into this size
+            resize_method:'resize' or 'pad', if pad, images and labels will be paded into 500x500
+                        and the parameter image_size will not be used
         '''
         self.root_path = root_path
+        self.resize_method = resize_method
+        if resize_method != 'resize' and resize_method != 'pad':
+            print('Unknown resize method:', resize_method)
+            exit()
         if root_path[len(root_path) - 1] != '/' and root_path[len(root_path) - 1] != '\\':
             self.root_path += '/'
         self.train_list_path = self.root_path + 'ImageSets/Segmentation/train.txt'
@@ -95,7 +102,12 @@ class VOC2012:
             self.read_train_list()
         for filename in self.train_list:
             image = cv2.imread(self.image_path + filename + '.jpg')
-            image = cv2.resize(image, self.image_size)
+            if self.resize_method == 'resize':
+                image = cv2.resize(image, self.image_size)
+            elif self.resize_method == 'pad':
+                height = np.shape(image)[0]
+                width = np.shape(image)[1]
+                image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
             self.train_images.append(image)
             if len(self.train_images) % 100 == 0:
                 print('Reading train images', len(self.train_images), '/', len(self.train_list))
@@ -112,8 +124,13 @@ class VOC2012:
             self.read_train_list()
         for filename in self.train_list:
             image = Image.open(self.label_path + filename + '.png')
-            image = image.resize(self.image_size)
             image = np.array(image)
+            if self.resize_method == 'resize':
+                image = cv2.resize(image, self.image_size)
+            elif self.resize_method == 'pad':
+                height = np.shape(image)[0]
+                width = np.shape(image)[1]
+                image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
             image[image > 100] = 0
             self.train_labels.append(image)
             if len(self.train_labels) % 100 == 0:
@@ -129,7 +146,12 @@ class VOC2012:
             self.read_val_list()
         for filename in self.val_list:
             image = cv2.imread(self.image_path + filename + '.jpg')
-            image = cv2.resize(image, self.image_size)
+            if self.resize_method == 'resize':
+                image = cv2.resize(image, self.image_size)
+            elif self.resize_method == 'pad':
+                height = np.shape(image)[0]
+                width = np.shape(image)[1]
+                image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
             self.val_images.append(image)
             if len(self.val_images) % 100 == 0:
                 print('Reading val images', len(self.val_images), '/', len(self.val_list))
@@ -146,8 +168,13 @@ class VOC2012:
             self.read_val_list()
         for filename in self.val_list:
             image = Image.open(self.label_path + filename + '.png')
-            image = image.resize(self.image_size)
             image = np.array(image)
+            if self.resize_method == 'resize':
+                image = cv2.resize(image, self.image_size)
+            elif self.resize_method == 'pad':
+                height = np.shape(image)[0]
+                width = np.shape(image)[1]
+                image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
             image[image > 100] = 0
             self.val_labels.append(image)
             if len(self.val_labels) % 100 == 0:
@@ -177,13 +204,23 @@ class VOC2012:
         for label_filename in aug_labels_filenames:
             # read label
             label = cv2.imread(self.aug_path + label_filename, cv2.IMREAD_GRAYSCALE)
-            label = cv2.resize(label, self.image_size)
+            if self.resize_method == 'resize':
+                label = cv2.resize(label, self.image_size)
+            elif self.resize_method == 'pad':
+                height = np.shape(label)[0]
+                width = np.shape(label)[1]
+                label = cv2.copyMakeBorder(label, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
             label[label > 20] = 0
             self.aug_labels.append(label)
             # read image
             image_filename = label_filename.replace('.png','.jpg')
             image = cv2.imread(self.image_path + image_filename)
-            image = cv2.resize(image, self.image_size)
+            if self.resize_method == 'resize':
+                image = cv2.resize(image, self.image_size)
+            elif self.resize_method == 'pad':
+                height = np.shape(image)[0]
+                width = np.shape(image)[1]
+                image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
             self.aug_images.append(image)
             if len(self.aug_labels) % 100 == 0:
                 print('Reading augmentation image & label pairs', len(self.aug_labels), '/',
