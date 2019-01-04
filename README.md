@@ -49,3 +49,8 @@ You can get a batch just like this.
 batch_train_images, batch_train_labels = voc2012.get_batch_train(batch_size=8)
 batch_val_images, batch_val_labels = voc2012.get_batch_val(batch_size=8)
 ```
+## About Size
+There are 2 methods you can choose to set the uniform image size.
+They are 'resize' and 'pad'.
+'resize' means uses cv2.resize() to set the image size you want, while 'pad' means add zeros at the bottom and right if the original image is smaller than 500x500.
+So when you set 'pad' method, all images and labels will be padding into 500x500.
