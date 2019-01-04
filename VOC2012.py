@@ -175,7 +175,7 @@ class VOC2012:
                 height = np.shape(image)[0]
                 width = np.shape(image)[1]
                 image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
-            image[image > 100] = 0
+            image[image > 20] = 0
             self.val_labels.append(image)
             if len(self.val_labels) % 100 == 0:
                 print('Reading val labels', len(self.val_labels), '/', len(self.val_list))
@@ -199,7 +199,15 @@ class VOC2012:
         if self.image_path is None or os.path.exists(self.image_path) == False:
             raise Exception('Cannot find VOC2012 images path.')
 
+        if hasattr(self, 'val_list') == False:
+            self.read_val_list()
         aug_labels_filenames = os.listdir(self.aug_path)
+
+        for i in range(len(aug_labels_filenames)):
+            aug_labels_filenames[i] = aug_labels_filenames[i][:-4]
+        aug_labels_filenames = list(set(aug_labels_filenames) - set(self.val_list))
+        for i in range(len(aug_labels_filenames)):
+            aug_labels_filenames[i] = aug_labels_filenames[i] + '.png'
 
         for label_filename in aug_labels_filenames:
             # read label
@@ -226,6 +234,21 @@ class VOC2012:
                 print('Reading augmentation image & label pairs', len(self.aug_labels), '/',
                                                                     len(aug_labels_filenames))
         save_h5(save_path, self.aug_images, self.aug_labels)
+    def calc_pixel_mean(self, dataset='voc2012_aug'):
+        if dataset == 'voc2012_aug':
+            dataset = self.aug_images
+        sum_r = 0
+        sum_g = 0
+        sum_b = 0
+        for i in range(len(dataset)):
+            img = dataset[i]
+            sum_r = sum_r + img[:, :, 0].mean()
+            sum_g = sum_g + img[:, :, 1].mean()
+            sum_b = sum_b + img[:, :, 2].mean()
+        sum_r = sum_r / len(dataset)
+        sum_g = sum_g / len(dataset)
+        sum_b = sum_b / len(dataset)
+        print(sum_r, sum_g, sum_b)
     def load_aug_data(self, aug_data_path='./voc2012_aug.h5'):
         self.aug_images, self.aug_labels = load_h5(aug_data_path)
     def save_train_data(self, path='./voc2012_train.h5'):
@@ -348,3 +371,27 @@ class VOC2012:
             batch_labels = np.concatenate([batch_labels, self.aug_labels[0:self.aug_location]], axis=0)
 
         return batch_images, batch_labels
+    def index_to_rgb(self, index):
+        '''
+        Find the rgb color with the class index
+        :param index:
+        :return: A list like [1, 2, 3]
+        '''
+        color_dict = {0:[0, 0, 0], 1:[128, 0, 0], 2:[0, 128, 0], 3:[128, 128, 0], 4:[0, 0, 128], 5:[128, 0, 128],
+                      6:[0, 128, 128], 7:[128, 128, 128], 8:[64, 0, 0], 9:[192, 0, 0], 10:[64, 128, 0],
+                      11:[192, 128, 0], 12:[64, 0, 128], 13:[192, 0, 128], 14:[64, 128, 128], 15:[192, 128, 128],
+                      16:[0, 64, 0], 17:[128, 64, 0], 18:[0, 192, 0], 19:[128, 192, 0], 20:[0, 64, 128]}
+        return color_dict[index]
+    def gray_to_rgb(self, image):
+        '''
+        Convert the gray image(mask image) to a rgb image
+        :param image: gray image, with shape [height, width]
+        :return: rgb image, with shape [height, width, 3]
+        '''
+        height = np.shape(image)[0]
+        width = np.shape(image)[1]
+        result = np.zeros([height, width, 3], dtype='uint8')
+        for h in range(height):
+            for w in range(width):
+                result[h][w] = self.index_to_rgb(image[h][w])
+        return result
