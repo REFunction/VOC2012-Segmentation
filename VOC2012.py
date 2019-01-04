@@ -117,7 +117,7 @@ class VOC2012:
         If you haven't called self.read_train_list(), it will call first
         After reading labels, it will resize them
 
-        Note:image[image > 100] = 0 will remove all white borders in original labels
+        Note:image[image > 20] = 0 will remove all white borders in original labels
         '''
         self.train_labels = []
         if hasattr(self, 'train_list') == False:
@@ -131,7 +131,7 @@ class VOC2012:
                 height = np.shape(image)[0]
                 width = np.shape(image)[1]
                 image = cv2.copyMakeBorder(image, 0, 500 - height, 0, 500 - width, cv2.BORDER_CONSTANT, value=0)
-            image[image > 100] = 0
+            image[image > 20] = 0
             self.train_labels.append(image)
             if len(self.train_labels) % 100 == 0:
                 print('Reading train labels', len(self.train_labels), '/', len(self.train_list))
@@ -249,6 +249,14 @@ class VOC2012:
         sum_g = sum_g / len(dataset)
         sum_b = sum_b / len(dataset)
         print(sum_r, sum_g, sum_b)
+    def minus_pixel_mean(self, dataset='voc2012_aug'):
+        # 73.77128067510867 79.81435653033444 83.51524806539375
+        if dataset == 'voc2012_aug':
+            dataset = self.aug_images
+
+        print(np.shape(dataset - np.array([73.77128067510867, 79.81435653033444, 83.51524806539375])))
+        if dataset == 'voc2012_aug':
+            self.aug_images = dataset
     def load_aug_data(self, aug_data_path='./voc2012_aug.h5'):
         self.aug_images, self.aug_labels = load_h5(aug_data_path)
     def save_train_data(self, path='./voc2012_train.h5'):
