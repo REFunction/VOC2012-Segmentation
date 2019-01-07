@@ -125,6 +125,7 @@ class VOC2012:
         for filename in self.train_list:
             image = Image.open(self.label_path + filename + '.png')
             image = np.array(image)
+            image[image > 20] = 0
             if self.resize_method == 'resize':
                 image = cv2.resize(image, self.image_size)
             elif self.resize_method == 'pad':
@@ -169,6 +170,7 @@ class VOC2012:
         for filename in self.val_list:
             image = Image.open(self.label_path + filename + '.png')
             image = np.array(image)
+            image[image > 20] = 0
             if self.resize_method == 'resize':
                 image = cv2.resize(image, self.image_size)
             elif self.resize_method == 'pad':
@@ -212,6 +214,7 @@ class VOC2012:
         for label_filename in aug_labels_filenames:
             # read label
             label = cv2.imread(self.aug_path + label_filename, cv2.IMREAD_GRAYSCALE)
+            label[label > 20] = 0
             if self.resize_method == 'resize':
                 label = cv2.resize(label, self.image_size)
             elif self.resize_method == 'pad':
@@ -249,14 +252,6 @@ class VOC2012:
         sum_g = sum_g / len(dataset)
         sum_b = sum_b / len(dataset)
         print(sum_r, sum_g, sum_b)
-    def minus_pixel_mean(self, dataset='voc2012_aug'):
-        # 73.77128067510867 79.81435653033444 83.51524806539375
-        if dataset == 'voc2012_aug':
-            dataset = self.aug_images
-
-        print(np.shape(dataset - np.array([73.77128067510867, 79.81435653033444, 83.51524806539375])))
-        if dataset == 'voc2012_aug':
-            self.aug_images = dataset
     def load_aug_data(self, aug_data_path='./voc2012_aug.h5'):
         self.aug_images, self.aug_labels = load_h5(aug_data_path)
     def save_train_data(self, path='./voc2012_train.h5'):
