@@ -127,7 +127,7 @@ class VOC2012:
             image = np.array(image)
             image[image > 20] = 0
             if self.resize_method == 'resize':
-                image = cv2.resize(image, self.image_size)
+                image = cv2.resize(image, self.image_size, interpolation=cv2.INTER_NEAREST)
             elif self.resize_method == 'pad':
                 height = np.shape(image)[0]
                 width = np.shape(image)[1]
@@ -172,7 +172,7 @@ class VOC2012:
             image = np.array(image)
             image[image > 20] = 0
             if self.resize_method == 'resize':
-                image = cv2.resize(image, self.image_size)
+                image = cv2.resize(image, self.image_size, interpolation=cv2.INTER_NEAREST)
             elif self.resize_method == 'pad':
                 height = np.shape(image)[0]
                 width = np.shape(image)[1]
@@ -216,7 +216,7 @@ class VOC2012:
             label = cv2.imread(self.aug_path + label_filename, cv2.IMREAD_GRAYSCALE)
             label[label > 20] = 0
             if self.resize_method == 'resize':
-                label = cv2.resize(label, self.image_size)
+                label = cv2.resize(label, self.image_size, interpolation=cv2.INTER_NEAREST)
             elif self.resize_method == 'pad':
                 height = np.shape(label)[0]
                 width = np.shape(label)[1]
@@ -349,7 +349,7 @@ class VOC2012:
         if end - start != batch_size:
             batch_images = np.concatenate([batch_images, self.val_images[0:self.val_location]], axis=0)
             batch_labels = np.concatenate([batch_labels, self.val_labels[0:self.val_location]], axis=0)
-
+        print(self.val_location)
         return batch_images, batch_labels
     def get_batch_aug(self, batch_size):
         '''
