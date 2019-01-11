@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import h5py
 import os
+import random
 
 def save_h5(path,images,labels):
     print('saving', path)
@@ -349,7 +350,6 @@ class VOC2012:
         if end - start != batch_size:
             batch_images = np.concatenate([batch_images, self.val_images[0:self.val_location]], axis=0)
             batch_labels = np.concatenate([batch_labels, self.val_labels[0:self.val_location]], axis=0)
-        print(self.val_location)
         return batch_images, batch_labels
     def get_batch_aug(self, batch_size):
         '''
@@ -374,6 +374,31 @@ class VOC2012:
             batch_labels = np.concatenate([batch_labels, self.aug_labels[0:self.aug_location]], axis=0)
 
         return batch_images, batch_labels
+    def random_resize(self, image_batch, label_batch, random_blur=True):
+        '''
+        resize the batch data randomly
+        :param image_batch: shape [batch_size, height, width, 3]
+        :param label_batch: shape [batch_size, height, width, 1]
+        :param random_blur:If true, blur the image randomly with Gaussian Blur method
+        :return:
+        '''
+        new_image_batch = []
+        new_label_batch = []
+        batch_shape = np.shape(image_batch)
+        a = random.random() / 2 + 0.5 # (0,1) -> (0, 1.5)->(0.5, 2)
+        b = random.random() / 2 + 0.5 # (0,1) -> (0, 1.5)->(0.5, 2)
+        batch_size = batch_shape[0]
+        new_height = int(a * batch_shape[1])
+        new_width = int(b * batch_shape[2])
+        for i in range(batch_size):
+            image = image_batch[i]
+            if random_blur:
+                radius = int(random.randrange(0, 3))  * 2 + 1
+                image = cv2.GaussianBlur(image, (radius, radius), random.randrange(0, 3))
+            new_image_batch.append(cv2.resize(image, (new_height, new_width)))
+            new_label_batch.append(cv2.resize(label_batch[i], (new_height, new_width), interpolation=cv2.INTER_NEAREST))
+        return new_image_batch, new_label_batch
+
     def index_to_rgb(self, index):
         '''
         Find the rgb color with the class index
