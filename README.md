@@ -9,9 +9,10 @@ This code will help you use Pascal VOC 2012 Dataset to do research on Semantic S
 ## How to Start
 To use Pascal VOC 2012 Dataset, you must have one.
 
-http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
+https://pan.baidu.com/s/1L_H66mV1cnhOCm4ACypHZg
+Download the dataset from this url.It contains train/val/augmentation dataset.
 
-Download and extract it.
+Download and extract it.Or you can download .h5 files directly.
 
 ### Now create a VOC object like this.
 
