@@ -4,6 +4,8 @@ from PIL import Image
 import h5py
 import os
 import random
+import threading
+import queue
 
 def save_h5(path,images,labels):
     print('saving', path)
@@ -374,6 +376,34 @@ class VOC2012:
             batch_labels = np.concatenate([batch_labels, self.aug_labels[0:self.aug_location]], axis=0)
 
         return batch_images, batch_labels
+    def add_batch_aug_queue(self, batch_size, max_queue_size):
+        if hasattr(self, 'aug_queue') == False:
+            self.aug_queue = queue.Queue(maxsize=max_queue_size)
+        while 1:
+            image_batch, label_batch = self.get_batch_aug(batch_size)
+            image_batch, label_batch = self.random_resize(image_batch, label_batch)
+            self.aug_queue.put([image_batch, label_batch])
+    def start_batch_aug_queue(self, batch_size, max_queue_size=30):
+        if hasattr(self, 'aug_queue') == False:
+            queue_thread = threading.Thread(target=self.add_batch_aug_queue, args=(batch_size, max_queue_size))
+            queue_thread.start()
+    def get_batch_aug_fast(self, batch_size, max_queue_size=30):
+        '''
+        A fast function for get augmentation batch.Use another thread to get batch and put into a queue.
+        :param batch_size: batch size
+        :param max_queue_size: the max capacity of the queue
+        :return: An image batch with shape [batch_size, height, width, 3]
+                and a label batch with shape [batch_size, height, width, 1]
+        '''
+        # create queue thread
+        if hasattr(self, 'aug_queue') == False:
+            queue_thread = threading.Thread(target=self.add_batch_aug_queue, args=(batch_size, max_queue_size))
+            queue_thread.start()
+        while hasattr(self, 'aug_queue') == False:
+            time.sleep(0.1)
+        image_batch, label_batch = self.aug_queue.get()
+        return image_batch, label_batch
+
     def random_resize(self, image_batch, label_batch, random_blur=True):
         '''
         resize the batch data randomly
@@ -423,3 +453,7 @@ class VOC2012:
             for w in range(width):
                 result[h][w] = self.index_to_rgb(image[h][w])
         return result
+    def get_one_class_label(self, label, class_id):
+        new_label = label
+        new_label[new_label != class_id] = 0
+        return new_label
