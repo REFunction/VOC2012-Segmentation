@@ -1,5 +1,5 @@
 <p align="center">
-<strong>English</strong> | <a href="https://github.com/REFunction/VOC2012-Segmentation/master/blob/README_zh.md"><strong>中文</strong></a>
+<strong>English</strong> | <a href="https://github.com/REFunction/VOC2012-Segmentation/blob/master/README_zh.md"><strong>中文</strong></a>
 </p>
 
 # VOC2012-Segmentation
