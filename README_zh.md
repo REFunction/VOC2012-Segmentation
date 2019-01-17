@@ -1,6 +1,6 @@
 
 <p align="center">
-<a href="https://github.com/REFunction/VOC2012-Segmentation/master/README.md"><strong>English</strong> </a>| <strong>中文</strong>
+<a href="https://github.com/REFunction/VOC2012-Segmentation/blob/master/README.md"><strong>English</strong> </a>| <strong>中文</strong>
 </p>
 
 # VOC2012-分割
