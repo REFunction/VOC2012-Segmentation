@@ -72,3 +72,8 @@ while training:
   image_batch, label_batch = coco2014.get_batch_fast(batch_size=8)
 ```
 注意：推荐你使用get_batch_fast()，虽然get_batch()也能用但是比较慢。前者用了额外的线程和队列机制保证你的sess.run的同时读取数据，非常高效。
+## 我还是不会用，代码看不懂
+没关系，你可以解决问题通过
+1. 发起一个issue
+2. 给我发邮件 function@bupt.edu.cn 或者 806675223@qq.com
+3. 加我QQ:806675223
