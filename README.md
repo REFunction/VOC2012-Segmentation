@@ -72,3 +72,8 @@ while training:
   image_batch, label_batch = coco2014.get_batch_fast(batch_size=8)
 ```
 Note: I recommand get_batch_fast() while get_batch() can be alse used. The fromer is implemented with another theading and maintaining a queue, which is much faster when you call sess.run() during training.
+## I don't understand how to use and there are so many puzzling code
+Ok. You can solve your problems with
+1. Raise your issue
+2. Send e-mail to me function@bupt.edu.cn or 806675223@qq.com
+3. Contact with me with QQ:806675223
