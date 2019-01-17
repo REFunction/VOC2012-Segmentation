@@ -18,6 +18,7 @@ If you don't have much memory for creating augmentation dataset into .h5 file, y
 voc2012 = VOC2012('./VOC2012/')
 ```
 Only to assign the root path of your dataset.
+
 3. Read all data and save in the form of h5
 h5py is an excellent packge which can save and load images very fast.You don't need to read raw images every time before you train your model.
 ``` python
@@ -29,6 +30,7 @@ If you want to create augmentation dataset into .h5 file, you must have 16 GB me
 voc2012.read_aug_images_labels_and_save()
 ```
 Or you can download voc2012_aug.h5
+
 4. Load h5
 After saving .h5 files, you can load them next time at a very fast speed like this.
 ``` python
