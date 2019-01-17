@@ -1,6 +1,7 @@
 <p align="center">
-<strong>English</strong> | <a href="https://github.com/REFunction/VOC2012-Segmentation/master/README_zh.md"><strong>中文</strong></a>
+<strong>English</strong> | <a href="https://github.com/REFunction/VOC2012-Segmentation/master/blob/README_zh.md"><strong>中文</strong></a>
 </p>
+
 # VOC2012-Segmentation
 This code will help you use Pascal VOC 2012 Dataset to do research on Semantic Segmentation.
 ## Prerequisition
