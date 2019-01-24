@@ -4,7 +4,7 @@
 
 # VOC2012-Segmentation
 This code will help you use Pascal VOC 2012 Dataset to do research on Semantic Segmentation.
-# Update
+## Update
 I have finished a slim version of VOC2012.py, **VOC2012_slim.py**. You don't need to preprocess any thing. And you can learn to use it very easily. It seems no problems but I think it's safe to keep these two versions for a period of time.
 
 Usage:Put VOC2012_slim.py into your project and run it, set the path as yours.
