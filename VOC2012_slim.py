@@ -270,10 +270,8 @@ class VOC2012:
 
 if __name__ == '__main__':
     voc2012 = VOC2012('h:/VOC2012/', 'h:/VOC2012/SegmentationClassAug/', image_size=(513, 513))
-    voc2012.start_batch_aug_queue(batch_size=8)
-    import time
-    time.sleep(4)
-    for i in range(40):
-        start_time = time.time()
-        voc2012.get_batch_aug_fast(batch_size=8, random_resize=False)
-        print(time.time() - start_time, voc2012.aug_queue.qsize())
+
+    batch_images, batch_labels = voc2012.get_batch_aug_fast(batch_size=8)
+    cv2.imshow('image', batch_images[4])
+    cv2.imshow('label', batch_labels[4])
+    cv2.waitKey(0)
